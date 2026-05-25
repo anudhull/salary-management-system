@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { body } from 'express-validator'
-import { createEmployee } from '../controllers/employeeController.js'
+import { createEmployee, getEmployeeById } from '../controllers/employeeController.js'
 
 const router = Router()
 
@@ -17,5 +17,6 @@ const employeeValidation = [
 ]
 
 router.post('/', employeeValidation, createEmployee)
+router.get('/:id', getEmployeeById)
 
 export default router
