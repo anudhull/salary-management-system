@@ -233,4 +233,13 @@ describe('GET /api/employees', () => {
     expect(res.status).toBe(200)
     expect(res.body.data[0].employment_type).toBe('full-time')
   })
+
+  it('filters employees by status', async () => {
+    mockListQuery()
+
+    const res = await request(app).get('/api/employees?status=active')
+
+    expect(res.status).toBe(200)
+    expect(res.body.data[0].status).toBe('active')
+  })
 })
