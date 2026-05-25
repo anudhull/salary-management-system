@@ -206,4 +206,13 @@ describe('GET /api/employees', () => {
     expect(res.status).toBe(200)
     expect(res.body.data[0].full_name).toBe('Jane Doe')
   })
+
+  it('filters employees by country', async () => {
+    mockListQuery()
+
+    const res = await request(app).get('/api/employees?country=United States')
+
+    expect(res.status).toBe(200)
+    expect(res.body.data[0].country).toBe('United States')
+  })
 })
