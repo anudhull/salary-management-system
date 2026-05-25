@@ -32,26 +32,21 @@ export const getEmployees = async (req, res) => {
   const conditions = []
   const params = []
 
+  const addFilter = (value, column) => {
+    if (value) {
+      params.push(value)
+      conditions.push(`${column} = $${params.length}`)
+    }
+  }
+
   if (search) {
     params.push(`%${search}%`)
     conditions.push(`full_name ILIKE $${params.length}`)
   }
-  if (country) {
-    params.push(country)
-    conditions.push(`country = $${params.length}`)
-  }
-  if (department) {
-    params.push(department)
-    conditions.push(`department = $${params.length}`)
-  }
-  if (employmentType) {
-    params.push(employmentType)
-    conditions.push(`employment_type = $${params.length}`)
-  }
-  if (status) {
-    params.push(status)
-    conditions.push(`status = $${params.length}`)
-  }
+  addFilter(country, 'country')
+  addFilter(department, 'department')
+  addFilter(employmentType, 'employment_type')
+  addFilter(status, 'status')
 
   const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''
 
