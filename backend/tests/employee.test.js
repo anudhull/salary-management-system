@@ -113,3 +113,59 @@ describe('POST /api/employees', () => {
     expect(res.body.errors).toBeDefined()
   })
 })
+
+describe('GET /api/employees/:id', () => {
+  it('returns a single employee when found', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [mockEmployee] })
+
+    const res = await request(app).get('/api/employees/1')
+
+    expect(res.status).toBe(200)
+    expect(res.body.id).toBe(1)
+    expect(res.body.full_name).toBe('Jane Doe')
+    expect(res.body.email).toBe('jane.doe@company.com')
+  })
+
+  it('returns 404 when employee does not exist', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [] })
+
+    const res = await request(app).get('/api/employees/999')
+
+    expect(res.status).toBe(404)
+    expect(res.body.error).toBe('Employee not found')
+  })
+
+  it('returns all expected fields in response', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [mockEmployee] })
+
+    const res = await request(app).get('/api/employees/1')
+
+    expect(res.status).toBe(200)
+    expect(res.body).toMatchObject({
+      id: expect.any(Number),
+      full_name: expect.any(String),
+      email: expect.any(String),
+      job_title: expect.any(String),
+      department: expect.any(String),
+      country: expect.any(String),
+      salary: expect.any(String),
+      employment_type: expect.any(String),
+      status: expect.any(String),
+      hire_date: expect.any(String),
+    })
+  })
+
+  it('returns 400 for non-numeric id', async () => {
+    const res = await request(app).get('/api/employees/abc')
+
+    expect(res.status).toBe(400)
+    expect(res.body.error).toBeDefined()
+  })
+
+  it('returns 400 for negative id', async () => {
+    const res = await request(app).get('/api/employees/-1')
+
+    expect(res.status).toBe(400)
+    expect(res.body.error).toBeDefined()
+  })
+})
