@@ -81,3 +81,28 @@ export const getEmployeeById = async (req, res) => {
 
   res.json(rows[0])
 }
+
+export const updateEmployee = async (req, res) => {
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() })
+  }
+
+  const id = parseInt(req.params.id)
+  const { full_name, email, job_title, department, country, salary, employment_type, status, hire_date } = req.body
+
+  const { rows } = await pool.query(
+    `UPDATE employees
+     SET full_name=$1, email=$2, job_title=$3, department=$4, country=$5,
+         salary=$6, employment_type=$7, status=$8, hire_date=$9, updated_at=NOW()
+     WHERE id=$10
+     RETURNING *`,
+    [full_name, email, job_title, department, country, salary, employment_type, status, hire_date, id]
+  )
+
+  if (rows.length === 0) {
+    return res.status(404).json({ error: 'Employee not found' })
+  }
+
+  res.json(rows[0])
+}
