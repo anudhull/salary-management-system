@@ -197,4 +197,13 @@ describe('GET /api/employees', () => {
     expect(res.body.page).toBe(2)
     expect(res.body.pageSize).toBe(5)
   })
+
+  it('returns matched employees when searching by name', async () => {
+    mockListQuery()
+
+    const res = await request(app).get('/api/employees?search=Jane')
+
+    expect(res.status).toBe(200)
+    expect(res.body.data[0].full_name).toBe('Jane Doe')
+  })
 })
