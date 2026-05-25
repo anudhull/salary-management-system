@@ -169,3 +169,17 @@ describe('GET /api/employees/:id', () => {
     expect(res.body.error).toBeDefined()
   })
 })
+
+describe('GET /api/employees', () => {
+  it('returns 200 with data and total', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [mockEmployee] })
+      .mockResolvedValueOnce({ rows: [{ count: '1' }] })
+
+    const res = await request(app).get('/api/employees')
+
+    expect(res.status).toBe(200)
+    expect(res.body.data).toBeDefined()
+    expect(res.body.total).toBeDefined()
+  })
+})
