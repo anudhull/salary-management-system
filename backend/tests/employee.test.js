@@ -170,11 +170,16 @@ describe('GET /api/employees/:id', () => {
   })
 })
 
+// mocks the two queries the list endpoint always makes
+const mockListQuery = (rows = [mockEmployee], count = '1') => {
+  pool.query
+    .mockResolvedValueOnce({ rows })
+    .mockResolvedValueOnce({ rows: [{ count }] })
+}
+
 describe('GET /api/employees', () => {
   it('returns 200 with data and total', async () => {
-    pool.query
-      .mockResolvedValueOnce({ rows: [mockEmployee] })
-      .mockResolvedValueOnce({ rows: [{ count: '1' }] })
+    mockListQuery()
 
     const res = await request(app).get('/api/employees')
 
@@ -184,9 +189,7 @@ describe('GET /api/employees', () => {
   })
 
   it('returns correct page and pageSize in response', async () => {
-    pool.query
-      .mockResolvedValueOnce({ rows: [mockEmployee] })
-      .mockResolvedValueOnce({ rows: [{ count: '1' }] })
+    mockListQuery()
 
     const res = await request(app).get('/api/employees?page=2&pageSize=5')
 
