@@ -182,4 +182,16 @@ describe('GET /api/employees', () => {
     expect(res.body.data).toBeDefined()
     expect(res.body.total).toBeDefined()
   })
+
+  it('returns correct page and pageSize in response', async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [mockEmployee] })
+      .mockResolvedValueOnce({ rows: [{ count: '1' }] })
+
+    const res = await request(app).get('/api/employees?page=2&pageSize=5')
+
+    expect(res.status).toBe(200)
+    expect(res.body.page).toBe(2)
+    expect(res.body.pageSize).toBe(5)
+  })
 })
