@@ -94,4 +94,22 @@ describe('POST /api/employees', () => {
     expect(res.status).toBe(400)
     expect(res.body.errors).toBeDefined()
   })
+
+  it('returns 400 for invalid status value', async () => {
+    const res = await request(app)
+      .post('/api/employees')
+      .send({ ...validPayload, status: 'terminated' })
+
+    expect(res.status).toBe(400)
+    expect(res.body.errors).toBeDefined()
+  })
+
+  it('returns 400 for invalid hire_date format', async () => {
+    const res = await request(app)
+      .post('/api/employees')
+      .send({ ...validPayload, hire_date: 'not-a-date' })
+
+    expect(res.status).toBe(400)
+    expect(res.body.errors).toBeDefined()
+  })
 })
