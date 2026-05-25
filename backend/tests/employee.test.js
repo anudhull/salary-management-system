@@ -261,3 +261,17 @@ describe('GET /api/employees', () => {
     expect(res.body.data[0].status).toBe('active')
   })
 })
+
+describe('PUT /api/employees/:id', () => {
+  it('updates an employee and returns 200 with updated data', async () => {
+    const updated = { ...mockEmployee, job_title: 'Senior Engineer' }
+    pool.query.mockResolvedValueOnce({ rows: [updated] })
+
+    const res = await request(app)
+      .put('/api/employees/1')
+      .send(validPayload)
+
+    expect(res.status).toBe(200)
+    expect(res.body.job_title).toBe('Senior Engineer')
+  })
+})
