@@ -27,7 +27,7 @@ export const getEmployees = async (req, res) => {
   const page = parseInt(req.query.page) || 1
   const pageSize = parseInt(req.query.pageSize) || 20
   const offset = (page - 1) * pageSize
-  const { search, country } = req.query
+  const { search, country, department } = req.query
 
   const conditions = []
   const params = []
@@ -39,6 +39,10 @@ export const getEmployees = async (req, res) => {
   if (country) {
     params.push(country)
     conditions.push(`country = $${params.length}`)
+  }
+  if (department) {
+    params.push(department)
+    conditions.push(`department = $${params.length}`)
   }
 
   const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''
