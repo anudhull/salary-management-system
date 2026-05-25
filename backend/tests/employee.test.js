@@ -215,4 +215,13 @@ describe('GET /api/employees', () => {
     expect(res.status).toBe(200)
     expect(res.body.data[0].country).toBe('United States')
   })
+
+  it('filters employees by department', async () => {
+    mockListQuery()
+
+    const res = await request(app).get('/api/employees?department=Engineering')
+
+    expect(res.status).toBe(200)
+    expect(res.body.data[0].department).toBe('Engineering')
+  })
 })
