@@ -45,13 +45,27 @@ describe('POST /api/employees', () => {
     expect(res.body.id).toBeDefined()
   })
 
-  it('returns 400 when full_name is missing', async () => {
-    const res = await request(app)
-      .post('/api/employees')
-      .send({ ...validPayload, full_name: '' })
+  const requiredFields = [
+    'full_name',
+    'email',
+    'job_title',
+    'department',
+    'country',
+    'salary',
+    'employment_type',
+    'hire_date',
+  ]
 
-    expect(res.status).toBe(400)
-    expect(res.body.errors).toBeDefined()
+  requiredFields.forEach((field) => {
+    it(`returns 400 when ${field} is missing`, async () => {
+      const payload = { ...validPayload }
+      delete payload[field]
+
+      const res = await request(app).post('/api/employees').send(payload)
+
+      expect(res.status).toBe(400)
+      expect(res.body.errors).toBeDefined()
+    })
   })
 
   it('returns 400 when email is invalid', async () => {
