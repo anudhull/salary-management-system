@@ -24,14 +24,20 @@ export const createEmployee = async (req, res) => {
 }
 
 export const getEmployees = async (req, res) => {
+  const page = parseInt(req.query.page) || 1
+  const pageSize = parseInt(req.query.pageSize) || 20
+  const offset = (page - 1) * pageSize
+
   const [data, count] = await Promise.all([
-    pool.query('SELECT * FROM employees'),
+    pool.query('SELECT * FROM employees LIMIT $1 OFFSET $2', [pageSize, offset]),
     pool.query('SELECT COUNT(*) FROM employees'),
   ])
 
   res.json({
     data: data.rows,
     total: parseInt(count.rows[0].count),
+    page,
+    pageSize,
   })
 }
 
