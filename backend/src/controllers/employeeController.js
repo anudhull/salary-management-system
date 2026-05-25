@@ -23,6 +23,18 @@ export const createEmployee = async (req, res) => {
   res.status(201).json(rows[0])
 }
 
+export const getEmployees = async (req, res) => {
+  const [data, count] = await Promise.all([
+    pool.query('SELECT * FROM employees'),
+    pool.query('SELECT COUNT(*) FROM employees'),
+  ])
+
+  res.json({
+    data: data.rows,
+    total: parseInt(count.rows[0].count),
+  })
+}
+
 export const getEmployeeById = async (req, res) => {
   const id = parseInt(req.params.id)
 

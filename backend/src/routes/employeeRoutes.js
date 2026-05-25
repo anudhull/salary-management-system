@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { body } from 'express-validator'
-import { createEmployee, getEmployeeById } from '../controllers/employeeController.js'
+import { createEmployee, getEmployees, getEmployeeById } from '../controllers/employeeController.js'
 
 const router = Router()
 
@@ -16,6 +16,7 @@ const employeeValidation = [
   body('hire_date').isISO8601().withMessage('hire_date must be a valid date'),
 ]
 
+router.get('/', getEmployees)
 router.post('/', employeeValidation, createEmployee)
 router.get('/:id', getEmployeeById)
 
