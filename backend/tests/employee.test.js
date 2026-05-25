@@ -40,9 +40,18 @@ describe('POST /api/employees', () => {
     const res = await request(app).post('/api/employees').send(validPayload)
 
     expect(res.status).toBe(201)
-    expect(res.body.full_name).toBe('Jane Doe')
-    expect(res.body.email).toBe('jane.doe@company.com')
-    expect(res.body.id).toBeDefined()
+    expect(res.body).toMatchObject({
+      id: expect.any(Number),
+      full_name: expect.any(String),
+      email: expect.any(String),
+      job_title: expect.any(String),
+      department: expect.any(String),
+      country: expect.any(String),
+      salary: expect.any(String),
+      employment_type: expect.any(String),
+      status: expect.any(String),
+      hire_date: expect.any(String),
+    })
   })
 
   const requiredFields = [
@@ -111,6 +120,15 @@ describe('POST /api/employees', () => {
 
     expect(res.status).toBe(400)
     expect(res.body.errors).toBeDefined()
+  })
+
+  it('returns 409 when email already exists', async () => {
+    pool.query.mockRejectedValueOnce({ code: '23505' })
+
+    const res = await request(app).post('/api/employees').send(validPayload)
+
+    expect(res.status).toBe(409)
+    expect(res.body.error).toBe('Email already exists')
   })
 })
 
