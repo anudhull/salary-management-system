@@ -27,15 +27,21 @@ export const getEmployees = async (req, res) => {
   const page = parseInt(req.query.page) || 1
   const pageSize = parseInt(req.query.pageSize) || 20
   const offset = (page - 1) * pageSize
-  const { search } = req.query
+  const { search, country } = req.query
 
+  const conditions = []
   const params = []
-  let where = ''
 
   if (search) {
     params.push(`%${search}%`)
-    where = `WHERE full_name ILIKE $${params.length}`
+    conditions.push(`full_name ILIKE $${params.length}`)
   }
+  if (country) {
+    params.push(country)
+    conditions.push(`country = $${params.length}`)
+  }
+
+  const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''
 
   const [data, count] = await Promise.all([
     pool.query(`SELECT * FROM employees ${where} LIMIT $${params.length + 1} OFFSET $${params.length + 2}`, [...params, pageSize, offset]),
