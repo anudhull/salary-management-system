@@ -63,7 +63,7 @@ export const getEmployees = async (req, res) => {
   const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''
 
   const [data, count] = await Promise.all([
-    pool.query(`SELECT * FROM employees ${where} LIMIT $${params.length + 1} OFFSET $${params.length + 2}`, [...params, pageSize, offset]),
+    pool.query(`SELECT * FROM employees ${where} ORDER BY id LIMIT $${params.length + 1} OFFSET $${params.length + 2}`, [...params, pageSize, offset]),
     pool.query(`SELECT COUNT(*) FROM employees ${where}`, params),
   ])
 
