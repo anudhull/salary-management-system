@@ -35,6 +35,21 @@ export const getOverview = async (req, res) => {
   })
 }
 
+export const getRecentHires = async (req, res) => {
+  const months = parseInt(req.query.months) || 12
+
+  const { rows } = await pool.query(`
+    SELECT TO_CHAR(DATE_TRUNC('month', hire_date), 'YYYY-MM') AS month,
+           COUNT(*) AS hires
+    FROM employees
+    WHERE hire_date >= NOW() - INTERVAL '1 month' * $1
+    GROUP BY DATE_TRUNC('month', hire_date)
+    ORDER BY 1
+  `, [months])
+
+  res.json(rows.map(parseInts('hires')))
+}
+
 export const getByJobTitle = async (req, res) => {
   const { country } = req.query
 
