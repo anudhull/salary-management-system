@@ -130,6 +130,14 @@ describe('POST /api/employees', () => {
     expect(res.status).toBe(409)
     expect(res.body.error).toBe('Email already exists')
   })
+
+  it('returns 500 on unexpected database error', async () => {
+    pool.query.mockRejectedValueOnce(new Error('connection refused'))
+
+    const res = await request(app).post('/api/employees').send(validPayload)
+
+    expect(res.status).toBe(500)
+  })
 })
 
 describe('GET /api/employees/:id', () => {
@@ -185,6 +193,14 @@ describe('GET /api/employees/:id', () => {
 
     expect(res.status).toBe(400)
     expect(res.body.error).toBeDefined()
+  })
+
+  it('returns 500 on unexpected database error', async () => {
+    pool.query.mockRejectedValueOnce(new Error('connection refused'))
+
+    const res = await request(app).get('/api/employees/1')
+
+    expect(res.status).toBe(500)
   })
 })
 
@@ -260,6 +276,14 @@ describe('GET /api/employees', () => {
     expect(res.status).toBe(200)
     expect(res.body.data[0].status).toBe('active')
   })
+
+  it('returns 500 on unexpected database error', async () => {
+    pool.query.mockRejectedValueOnce(new Error('connection refused'))
+
+    const res = await request(app).get('/api/employees')
+
+    expect(res.status).toBe(500)
+  })
 })
 
 describe('PUT /api/employees/:id', () => {
@@ -315,5 +339,15 @@ describe('PUT /api/employees/:id', () => {
 
     expect(res.status).toBe(409)
     expect(res.body.error).toBe('Email already exists')
+  })
+
+  it('returns 500 on unexpected database error', async () => {
+    pool.query.mockRejectedValueOnce(new Error('connection refused'))
+
+    const res = await request(app)
+      .put('/api/employees/1')
+      .send(validPayload)
+
+    expect(res.status).toBe(500)
   })
 })
