@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Row, Col, Table, Select, Typography, Spin } from 'antd'
+import { Line, Pie } from '@ant-design/charts'
 import StatCard from '../components/StatCard.jsx'
 import { getOverview, getByCountry, getRecentHires, getByJobTitle } from '../services/api.js'
 
@@ -35,6 +36,7 @@ const jobTitleColumns = [
 export default function DashboardPage() {
   const [overview,  setOverview]  = useState(null)
   const [countries, setCountries] = useState([])
+  const [hires,     setHires]     = useState([])
   const [jobTitles, setJobTitles] = useState([])
   const [loading,   setLoading]   = useState(true)
 
@@ -49,9 +51,10 @@ export default function DashboardPage() {
 
   useEffect(() => {
     Promise.all([getOverview(), getByCountry(), getRecentHires()])
-      .then(([ov, ct]) => {
+      .then(([ov, ct, hr]) => {
         setOverview(ov)
         setCountries(ct)
+        setHires(hr)
       })
       .finally(() => setLoading(false))
   }, [])
@@ -85,6 +88,30 @@ export default function DashboardPage() {
             title="Max Salary"
             value={overview?.max_salary}
             prefix="$"
+          />
+        </Col>
+      </Row>
+
+      {/* Recent Hires + Employment Type */}
+      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+        <Col xs={24} lg={14}>
+          <Title level={5}>Recent Hires Trend</Title>
+          <Line
+            data={hires}
+            xField="month"
+            yField="hires"
+            height={260}
+            smooth
+          />
+        </Col>
+        <Col xs={24} lg={10}>
+          <Title level={5}>Employment Type</Title>
+          <Pie
+            data={overview?.employment_breakdown ?? []}
+            angleField="count"
+            colorField="employment_type"
+            height={260}
+            label={{ text: 'employment_type' }}
           />
         </Col>
       </Row>

@@ -2,6 +2,12 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { vi, beforeEach, afterEach } from 'vitest'
 
+vi.mock('@ant-design/charts', () => ({
+  Line: () => null,
+  Pie:  () => null,
+  Bar:  () => null,
+}))
+
 vi.mock('../services/api.js', () => ({
   getOverview:    vi.fn(),
   getByCountry:   vi.fn(),
