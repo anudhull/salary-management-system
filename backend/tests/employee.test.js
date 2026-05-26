@@ -351,3 +351,14 @@ describe('PUT /api/employees/:id', () => {
     expect(res.status).toBe(500)
   })
 })
+
+describe('DELETE /api/employees/:id', () => {
+  it('deletes an employee and returns 204', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [mockEmployee] })
+
+    const res = await request(app).delete('/api/employees/1')
+
+    expect(res.status).toBe(204)
+    expect(res.body).toEqual({})
+  })
+})
