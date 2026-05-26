@@ -79,7 +79,7 @@ describe('DashboardPage', () => {
   it('renders job title section with country selector', async () => {
     render(<DashboardPage />)
     await waitFor(() => screen.getByText('United States'))
-    expect(screen.getByText(/job title/i)).toBeInTheDocument()
+    expect(screen.getByText('Job Title Breakdown')).toBeInTheDocument()
   })
 
   it('fetches job titles when a country is selected', async () => {
