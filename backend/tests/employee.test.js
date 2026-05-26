@@ -361,4 +361,35 @@ describe('DELETE /api/employees/:id', () => {
     expect(res.status).toBe(204)
     expect(res.body).toEqual({})
   })
+
+  it('returns 404 when employee does not exist', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [] })
+
+    const res = await request(app).delete('/api/employees/999')
+
+    expect(res.status).toBe(404)
+    expect(res.body.error).toBe('Employee not found')
+  })
+
+  it('returns 400 for non-numeric id', async () => {
+    const res = await request(app).delete('/api/employees/abc')
+
+    expect(res.status).toBe(400)
+    expect(res.body.error).toBeDefined()
+  })
+
+  it('returns 400 for negative id', async () => {
+    const res = await request(app).delete('/api/employees/-1')
+
+    expect(res.status).toBe(400)
+    expect(res.body.error).toBeDefined()
+  })
+
+  it('returns 500 on unexpected database error', async () => {
+    pool.query.mockRejectedValueOnce(new Error('connection refused'))
+
+    const res = await request(app).delete('/api/employees/1')
+
+    expect(res.status).toBe(500)
+  })
 })
