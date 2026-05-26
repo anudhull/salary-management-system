@@ -50,7 +50,7 @@ const pick = (arr) => arr[Math.floor(Math.random() * arr.length)]
 const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min
 const randDate = () => {
   const start = new Date('2015-01-01')
-  const end   = new Date('2024-12-31')
+  const end   = new Date()
   const ms = start.getTime() + Math.random() * (end.getTime() - start.getTime())
   return new Date(ms).toISOString().split('T')[0]
 }
