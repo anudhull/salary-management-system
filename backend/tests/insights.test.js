@@ -205,3 +205,65 @@ describe('GET /api/insights/overview', () => {
     expect(res.status).toBe(500)
   })
 })
+
+describe('GET /api/insights/recent-hires', () => {
+  it('returns monthly hire counts for the last 12 months by default', async () => {
+    pool.query.mockResolvedValueOnce({
+      rows: [
+        { month: '2024-01', hires: '15' },
+        { month: '2024-02', hires: '12' },
+        { month: '2024-03', hires: '20' },
+      ],
+    })
+
+    const res = await request(app).get('/api/insights/recent-hires')
+
+    expect(res.status).toBe(200)
+    expect(res.body).toHaveLength(3)
+    expect(res.body[0].month).toBe('2024-01')
+    expect(res.body[0].hires).toBe(15)
+  })
+
+  it('returns hire counts for custom month range when months param provided', async () => {
+    pool.query.mockResolvedValueOnce({
+      rows: [{ month: '2024-10', hires: '8' }],
+    })
+
+    const res = await request(app).get('/api/insights/recent-hires?months=3')
+
+    expect(res.status).toBe(200)
+    expect(res.body[0].hires).toBe(8)
+  })
+
+  it('returns results in chronological order', async () => {
+    pool.query.mockResolvedValueOnce({
+      rows: [
+        { month: '2024-01', hires: '10' },
+        { month: '2024-02', hires: '14' },
+        { month: '2024-03', hires: '9'  },
+      ],
+    })
+
+    const res = await request(app).get('/api/insights/recent-hires')
+
+    expect(res.body[0].month < res.body[1].month).toBe(true)
+    expect(res.body[1].month < res.body[2].month).toBe(true)
+  })
+
+  it('returns empty array when no hires in range', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [] })
+
+    const res = await request(app).get('/api/insights/recent-hires')
+
+    expect(res.status).toBe(200)
+    expect(res.body).toEqual([])
+  })
+
+  it('returns 500 on unexpected database error', async () => {
+    pool.query.mockRejectedValueOnce(new Error('connection refused'))
+
+    const res = await request(app).get('/api/insights/recent-hires')
+
+    expect(res.status).toBe(500)
+  })
+})
