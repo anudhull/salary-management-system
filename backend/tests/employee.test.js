@@ -305,4 +305,15 @@ describe('PUT /api/employees/:id', () => {
     expect(res.status).toBe(400)
     expect(res.body.errors).toBeDefined()
   })
+
+  it('returns 409 when updated email already belongs to another employee', async () => {
+    pool.query.mockRejectedValueOnce({ code: '23505' })
+
+    const res = await request(app)
+      .put('/api/employees/1')
+      .send(validPayload)
+
+    expect(res.status).toBe(409)
+    expect(res.body.error).toBe('Email already exists')
+  })
 })
