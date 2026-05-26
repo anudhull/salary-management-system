@@ -6,6 +6,35 @@ const parseInts = (...fields) => (row) => {
   return result
 }
 
+export const getOverview = async (req, res) => {
+  const [stats, breakdown] = await Promise.all([
+    pool.query(`
+      SELECT COUNT(*)                                    AS total,
+             ROUND(AVG(salary), 2)                       AS avg_salary,
+             MIN(salary)                                 AS min_salary,
+             MAX(salary)                                 AS max_salary,
+             COUNT(*) FILTER (WHERE status = 'active')  AS active_count
+      FROM employees
+    `),
+    pool.query(`
+      SELECT employment_type, COUNT(*) AS count
+      FROM employees
+      GROUP BY employment_type
+      ORDER BY count DESC
+    `),
+  ])
+
+  const s = stats.rows[0]
+  res.json({
+    total:                parseInt(s.total),
+    active_count:         parseInt(s.active_count),
+    avg_salary:           s.avg_salary,
+    min_salary:           s.min_salary,
+    max_salary:           s.max_salary,
+    employment_breakdown: breakdown.rows.map(parseInts('count')),
+  })
+}
+
 export const getByJobTitle = async (req, res) => {
   const { country } = req.query
 
