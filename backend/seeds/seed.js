@@ -42,7 +42,9 @@ const JOB_TITLES = [
   { title: 'CTO',                      min: 180000, max: 280000 },
 ]
 
-const EMPLOYMENT_TYPES = ['full-time', 'full-time', 'full-time', 'part-time', 'contract']
+// 60% full-time, 20% part-time, 20% contract
+const EMPLOYMENT_TYPES   = ['full-time', 'part-time', 'contract']
+const EMPLOYMENT_WEIGHTS = [60, 20, 20]
 
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)]
 const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min
@@ -52,6 +54,15 @@ const randDate = () => {
   const ms = start.getTime() + Math.random() * (end.getTime() - start.getTime())
   return new Date(ms).toISOString().split('T')[0]
 }
+const pickWeighted = (values, weights) => {
+  const roll = Math.random() * 100
+  let cumulative = 0
+  for (let i = 0; i < values.length; i++) {
+    cumulative += weights[i]
+    if (roll < cumulative) return values[i]
+  }
+  return values[values.length - 1]
+}
 
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL })
 
@@ -59,44 +70,32 @@ const TOTAL   = 10000
 const BATCH   = 1000
 const BATCHES = TOTAL / BATCH
 
-const usedEmails = new Set()
+// Incrementing counter guarantees unique emails — no Set, no retries
+let emailSeq = 1
 
 const generateEmployee = () => {
-  const first      = pick(firstNames)
-  const last       = pick(lastNames)
-  const full_name  = `${first} ${last}`
-  const jobEntry   = pick(JOB_TITLES)
-  const suffix     = Math.floor(10000 + Math.random() * 90000)
-  const email      = `${first.toLowerCase()}.${last.toLowerCase()}${suffix}@company.com`
-  const salary     = rand(jobEntry.min, jobEntry.max)
-  const status     = Math.random() < 0.9 ? 'active' : 'inactive'
+  const first     = pick(firstNames)
+  const last      = pick(lastNames)
+  const jobEntry  = pick(JOB_TITLES)
+  const email     = `${first.toLowerCase()}.${last.toLowerCase()}${emailSeq++}@company.com`
+  const salary    = rand(jobEntry.min, jobEntry.max)
+  const status    = Math.random() < 0.9 ? 'active' : 'inactive'
 
   return [
-    full_name,
+    `${first} ${last}`,
     email,
     jobEntry.title,
     pick(DEPARTMENTS),
     pick(COUNTRIES),
     salary,
-    pick(EMPLOYMENT_TYPES),
+    pickWeighted(EMPLOYMENT_TYPES, EMPLOYMENT_WEIGHTS),
     status,
     randDate(),
   ]
 }
 
 const seedBatch = async (client, batchNum) => {
-  const rows = []
-  let attempts = 0
-
-  while (rows.length < BATCH) {
-    const row = generateEmployee()
-    if (!usedEmails.has(row[1])) {
-      usedEmails.add(row[1])
-      rows.push(row)
-    }
-    if (++attempts > BATCH * 3) break
-  }
-
+  const rows         = Array.from({ length: BATCH }, generateEmployee)
   const placeholders = rows.map(
     (_, i) => `($${i * 9 + 1},$${i * 9 + 2},$${i * 9 + 3},$${i * 9 + 4},$${i * 9 + 5},$${i * 9 + 6},$${i * 9 + 7},$${i * 9 + 8},$${i * 9 + 9})`
   ).join(',')
@@ -108,7 +107,7 @@ const seedBatch = async (client, batchNum) => {
     rows.flat()
   )
 
-  console.log(`Batch ${batchNum}/${BATCHES} inserted (${rows.length} rows)`)
+  console.log(`Batch ${batchNum}/${BATCHES} inserted`)
 }
 
 const run = async () => {
