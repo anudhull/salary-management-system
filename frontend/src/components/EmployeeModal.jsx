@@ -22,8 +22,12 @@ export default function EmployeeModal({ open, employee, onSubmit, onCancel }) {
   }, [open, employee, form])
 
   const handleOk = async () => {
-    const values = await form.validateFields()
-    onSubmit({ ...values, hire_date: values.hire_date.format('YYYY-MM-DD') })
+    try {
+      const values = await form.validateFields()
+      onSubmit({ ...values, hire_date: values.hire_date.format('YYYY-MM-DD') })
+    } catch {
+      // validation failed — Ant Design shows field errors automatically
+    }
   }
 
   return (
