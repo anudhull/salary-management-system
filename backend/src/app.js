@@ -3,6 +3,7 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 import pool from './config/db.js'
 import employeeRoutes from './routes/employeeRoutes.js'
+import insightsRoutes from './routes/insightsRoutes.js'
 import { errorMiddleware } from './middleware/errorHandler.js'
 
 dotenv.config()
@@ -20,6 +21,7 @@ app.get('/db-health', async (req, res) => {
 })
 
 app.use('/api/employees', employeeRoutes)
+app.use('/api/insights', insightsRoutes)
 
 app.use(errorMiddleware)
 
