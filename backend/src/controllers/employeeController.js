@@ -12,15 +12,21 @@ export const createEmployee = async (req, res) => {
     country, salary, employment_type, status, hire_date,
   } = req.body
 
-  const { rows } = await pool.query(
-    `INSERT INTO employees
-      (full_name, email, job_title, department, country, salary, employment_type, status, hire_date)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
-     RETURNING *`,
-    [full_name, email, job_title, department, country, salary, employment_type, status ?? 'active', hire_date]
-  )
-
-  res.status(201).json(rows[0])
+  try {
+    const { rows } = await pool.query(
+      `INSERT INTO employees
+        (full_name, email, job_title, department, country, salary, employment_type, status, hire_date)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+       RETURNING *`,
+      [full_name, email, job_title, department, country, salary, employment_type, status ?? 'active', hire_date]
+    )
+    res.status(201).json(rows[0])
+  } catch (err) {
+    if (err.code === '23505') {
+      return res.status(409).json({ error: 'Email already exists' })
+    }
+    throw err
+  }
 }
 
 export const getEmployees = async (req, res) => {
