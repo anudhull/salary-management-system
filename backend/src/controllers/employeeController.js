@@ -1,5 +1,6 @@
 import { validationResult } from 'express-validator'
 import pool from '../config/db.js'
+import { isUniqueViolation } from '../middleware/errorHandler.js'
 
 export const createEmployee = async (req, res) => {
   const errors = validationResult(req)
@@ -22,7 +23,7 @@ export const createEmployee = async (req, res) => {
     )
     res.status(201).json(rows[0])
   } catch (err) {
-    if (err.code === '23505') {
+    if (isUniqueViolation(err)) {
       return res.status(409).json({ error: 'Email already exists' })
     }
     throw err
