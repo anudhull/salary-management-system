@@ -92,6 +92,10 @@ export const getEmployeeById = async (req, res) => {
 export const deleteEmployee = async (req, res) => {
   const id = parseInt(req.params.id)
 
+  if (isNaN(id) || id <= 0) {
+    return res.status(400).json({ error: 'Invalid employee id' })
+  }
+
   const { rows } = await pool.query(
     'DELETE FROM employees WHERE id = $1 RETURNING id',
     [id]
