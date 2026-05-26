@@ -274,4 +274,15 @@ describe('PUT /api/employees/:id', () => {
     expect(res.status).toBe(200)
     expect(res.body.job_title).toBe('Senior Engineer')
   })
+
+  it('returns 404 when employee does not exist', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [] })
+
+    const res = await request(app)
+      .put('/api/employees/999')
+      .send(validPayload)
+
+    expect(res.status).toBe(404)
+    expect(res.body.error).toBe('Employee not found')
+  })
 })
