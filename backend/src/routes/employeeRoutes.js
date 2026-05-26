@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { body } from 'express-validator'
 import { createEmployee, getEmployees, getEmployeeById, updateEmployee } from '../controllers/employeeController.js'
+import { asyncHandler } from '../middleware/errorHandler.js'
 
 const router = Router()
 
@@ -16,9 +17,9 @@ const employeeValidation = [
   body('hire_date').isISO8601().withMessage('hire_date must be a valid date'),
 ]
 
-router.get('/', getEmployees)
-router.post('/', employeeValidation, createEmployee)
-router.get('/:id', getEmployeeById)
-router.put('/:id', employeeValidation, updateEmployee)
+router.get('/', asyncHandler(getEmployees))
+router.post('/', employeeValidation, asyncHandler(createEmployee))
+router.get('/:id', asyncHandler(getEmployeeById))
+router.put('/:id', employeeValidation, asyncHandler(updateEmployee))
 
 export default router
