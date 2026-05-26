@@ -1,6 +1,8 @@
 import axios from 'axios'
 
-const http = axios.create({ baseURL: '/api' })
+const http = axios.create({
+  baseURL: import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : '/api',
+})
 
 export const getEmployees   = (params)        => http.get('/employees', { params }).then(r => r.data)
 export const getEmployee    = (id)            => http.get(`/employees/${id}`).then(r => r.data)
