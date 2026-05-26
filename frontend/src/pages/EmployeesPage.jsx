@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState } from 'react'
 import { Button, Table, Popconfirm, Tag, Space, Typography } from 'antd'
 import FilterBar from '../components/FilterBar.jsx'
 import EmployeeModal from '../components/EmployeeModal.jsx'
@@ -21,36 +21,39 @@ export default function EmployeesPage() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editing,   setEditing]   = useState(null)
 
-  const fetchData = useCallback(async (pg, ps, f) => {
-    setLoading(true)
-    try {
-      const res = await getEmployees({
-        page: pg, pageSize: ps,
-        search:          f.search          || undefined,
-        country:         f.country         || undefined,
-        department:      f.department      || undefined,
-        employmentType:  f.employmentType  || undefined,
-        status:          f.status          || undefined,
-      })
-      setData(res.data)
-      setTotal(res.total)
-    } finally {
-      setLoading(false)
+  useEffect(() => {
+    let cancelled = false
+    const load = async () => {
+      setLoading(true)
+      try {
+        const res = await getEmployees({
+          page, pageSize,
+          search:         filters.search         || undefined,
+          country:        filters.country        || undefined,
+          department:     filters.department     || undefined,
+          employmentType: filters.employmentType || undefined,
+          status:         filters.status         || undefined,
+        })
+        if (!cancelled) {
+          setData(res.data)
+          setTotal(res.total)
+        }
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
     }
-  }, [])
-
-  useEffect(() => { fetchData(page, pageSize, filters) }, [])
+    load()
+    return () => { cancelled = true }
+  }, [page, pageSize, filters])
 
   const handleFilterChange = (f) => {
     setFilters(f)
     setPage(1)
-    fetchData(1, pageSize, f)
   }
 
   const handleTableChange = (pagination) => {
     setPage(pagination.current)
     setPageSize(pagination.pageSize)
-    fetchData(pagination.current, pagination.pageSize, filters)
   }
 
   const openAdd    = ()    => { setEditing(null); setModalOpen(true) }
@@ -60,16 +63,19 @@ export default function EmployeesPage() {
   const handleSubmit = async (values) => {
     if (editing) {
       await updateEmployee(editing.id, values)
+      closeModal()
+      setFilters(f => ({ ...f }))   // trigger re-fetch on same page
     } else {
       await createEmployee(values)
+      closeModal()
+      setPage(1)
+      setFilters(initFilters)       // clear filters, go to page 1 → effect re-fetches
     }
-    closeModal()
-    fetchData(page, pageSize, filters)
   }
 
   const handleDelete = async (id) => {
     await deleteEmployee(id)
-    fetchData(page, pageSize, filters)
+    setFilters(f => ({ ...f }))     // trigger re-fetch
   }
 
   const columns = [
