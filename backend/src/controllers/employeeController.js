@@ -2,6 +2,11 @@ import { validationResult } from 'express-validator'
 import pool from '../config/db.js'
 import { isUniqueViolation } from '../middleware/errorHandler.js'
 
+const parseId = (param) => {
+  const id = parseInt(param)
+  return isNaN(id) || id <= 0 ? null : id
+}
+
 export const createEmployee = async (req, res) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
@@ -71,9 +76,9 @@ export const getEmployees = async (req, res) => {
 }
 
 export const getEmployeeById = async (req, res) => {
-  const id = parseInt(req.params.id)
+  const id = parseId(req.params.id)
 
-  if (isNaN(id) || id <= 0) {
+  if (!id) {
     return res.status(400).json({ error: 'Invalid employee id' })
   }
 
@@ -90,9 +95,9 @@ export const getEmployeeById = async (req, res) => {
 }
 
 export const deleteEmployee = async (req, res) => {
-  const id = parseInt(req.params.id)
+  const id = parseId(req.params.id)
 
-  if (isNaN(id) || id <= 0) {
+  if (!id) {
     return res.status(400).json({ error: 'Invalid employee id' })
   }
 
