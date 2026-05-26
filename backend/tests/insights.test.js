@@ -135,3 +135,73 @@ describe('GET /api/insights/job-title', () => {
     expect(res.status).toBe(500)
   })
 })
+
+describe('GET /api/insights/overview', () => {
+  const mockOverview = () => {
+    pool.query
+      .mockResolvedValueOnce({
+        rows: [{
+          total: '100',
+          avg_salary: '75000.00',
+          min_salary: '30000.00',
+          max_salary: '200000.00',
+          active_count: '90',
+        }],
+      })
+      .mockResolvedValueOnce({
+        rows: [
+          { employment_type: 'full-time', count: '70' },
+          { employment_type: 'part-time', count: '20' },
+          { employment_type: 'contract',  count: '10' },
+        ],
+      })
+  }
+
+  it('returns headcount, salary stats and active count', async () => {
+    mockOverview()
+
+    const res = await request(app).get('/api/insights/overview')
+
+    expect(res.status).toBe(200)
+    expect(res.body.total).toBe(100)
+    expect(res.body.active_count).toBe(90)
+    expect(res.body.avg_salary).toBe('75000.00')
+    expect(res.body.min_salary).toBe('30000.00')
+    expect(res.body.max_salary).toBe('200000.00')
+  })
+
+  it('returns employment type breakdown with counts as numbers', async () => {
+    mockOverview()
+
+    const res = await request(app).get('/api/insights/overview')
+
+    expect(res.body.employment_breakdown).toHaveLength(3)
+    expect(res.body.employment_breakdown[0]).toMatchObject({
+      employment_type: 'full-time',
+      count: 70,
+    })
+  })
+
+  it('returns all expected top-level fields', async () => {
+    mockOverview()
+
+    const res = await request(app).get('/api/insights/overview')
+
+    expect(res.body).toMatchObject({
+      total:                expect.any(Number),
+      active_count:         expect.any(Number),
+      avg_salary:           expect.any(String),
+      min_salary:           expect.any(String),
+      max_salary:           expect.any(String),
+      employment_breakdown: expect.any(Array),
+    })
+  })
+
+  it('returns 500 on unexpected database error', async () => {
+    pool.query.mockRejectedValueOnce(new Error('connection refused'))
+
+    const res = await request(app).get('/api/insights/overview')
+
+    expect(res.status).toBe(500)
+  })
+})
