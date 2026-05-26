@@ -113,6 +113,7 @@ const seedBatch = async (client, batchNum) => {
 const run = async () => {
   const client = await pool.connect()
   try {
+    await client.query('BEGIN')
     console.log('Clearing existing employees...')
     await client.query('TRUNCATE employees RESTART IDENTITY CASCADE')
 
@@ -120,11 +121,16 @@ const run = async () => {
       await seedBatch(client, i)
     }
 
+    await client.query('COMMIT')
     console.log(`Done — ${TOTAL} employees seeded.`)
+  } catch (err) {
+    await client.query('ROLLBACK')
+    throw err
   } finally {
     client.release()
     await pool.end()
   }
 }
+
 
 run().catch(err => { console.error(err); process.exit(1) })
