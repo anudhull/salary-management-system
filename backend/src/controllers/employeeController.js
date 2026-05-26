@@ -89,6 +89,21 @@ export const getEmployeeById = async (req, res) => {
   res.json(rows[0])
 }
 
+export const deleteEmployee = async (req, res) => {
+  const id = parseInt(req.params.id)
+
+  const { rows } = await pool.query(
+    'DELETE FROM employees WHERE id = $1 RETURNING id',
+    [id]
+  )
+
+  if (rows.length === 0) {
+    return res.status(404).json({ error: 'Employee not found' })
+  }
+
+  res.status(204).send()
+}
+
 export const updateEmployee = async (req, res) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {

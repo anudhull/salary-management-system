@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { body } from 'express-validator'
-import { createEmployee, getEmployees, getEmployeeById, updateEmployee } from '../controllers/employeeController.js'
+import { createEmployee, getEmployees, getEmployeeById, updateEmployee, deleteEmployee } from '../controllers/employeeController.js'
 import { asyncHandler } from '../middleware/errorHandler.js'
 
 const router = Router()
@@ -21,5 +21,6 @@ router.get('/', asyncHandler(getEmployees))
 router.post('/', employeeValidation, asyncHandler(createEmployee))
 router.get('/:id', asyncHandler(getEmployeeById))
 router.put('/:id', employeeValidation, asyncHandler(updateEmployee))
+router.delete('/:id', asyncHandler(deleteEmployee))
 
 export default router
