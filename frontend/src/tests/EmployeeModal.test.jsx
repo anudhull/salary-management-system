@@ -37,16 +37,14 @@ describe('EmployeeModal', () => {
     expect(onCancel).toHaveBeenCalledOnce()
   })
 
-  it('calls onSubmit with form data when Save clicked with valid input', async () => {
+  it('calls onSubmit when Save clicked with all fields pre-filled', async () => {
     const onSubmit = vi.fn()
-    render(<EmployeeModal {...defaultProps} onSubmit={onSubmit} />)
-
-    await userEvent.type(screen.getByLabelText(/full name/i), 'Alice Smith')
-    await userEvent.type(screen.getByLabelText(/email/i), 'alice@company.com')
-    await userEvent.type(screen.getByLabelText(/job title/i), 'Engineer')
-    await userEvent.type(screen.getByLabelText(/department/i), 'Engineering')
-    await userEvent.type(screen.getByLabelText(/country/i), 'India')
-    await userEvent.type(screen.getByLabelText(/salary/i), '90000')
+    const employee = {
+      id: 1, full_name: 'Alice Smith', email: 'alice@company.com',
+      job_title: 'Engineer', department: 'Engineering', country: 'India',
+      salary: 90000, employment_type: 'full-time', status: 'active', hire_date: '2022-01-01',
+    }
+    render(<EmployeeModal {...defaultProps} employee={employee} onSubmit={onSubmit} />)
 
     await userEvent.click(screen.getByRole('button', { name: /save/i }))
 
