@@ -54,7 +54,7 @@ describe('EmployeesPage', () => {
   it('opens modal when Add Employee is clicked', async () => {
     render(<EmployeesPage />)
     await userEvent.click(screen.getByRole('button', { name: /add employee/i }))
-    expect(screen.getByText('Add Employee')).toBeInTheDocument()
+    await waitFor(() => expect(screen.getByLabelText(/full name/i)).toBeInTheDocument())
   })
 
   it('shows Edit button per table row', async () => {
