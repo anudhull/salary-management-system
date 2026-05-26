@@ -285,4 +285,24 @@ describe('PUT /api/employees/:id', () => {
     expect(res.status).toBe(404)
     expect(res.body.error).toBe('Employee not found')
   })
+
+  it('returns 400 when required field is missing', async () => {
+    const { full_name, ...payload } = validPayload
+
+    const res = await request(app)
+      .put('/api/employees/1')
+      .send(payload)
+
+    expect(res.status).toBe(400)
+    expect(res.body.errors).toBeDefined()
+  })
+
+  it('returns 400 for invalid email on update', async () => {
+    const res = await request(app)
+      .put('/api/employees/1')
+      .send({ ...validPayload, email: 'not-an-email' })
+
+    expect(res.status).toBe(400)
+    expect(res.body.errors).toBeDefined()
+  })
 })
