@@ -2,11 +2,14 @@
 
 Full-stack HR tool to manage 10,000+ employees with salary insights.
 
+**Live demo:** https://salary-management-system-nine.vercel.app
+
 ## Stack
 
 - **Backend:** Node.js + Express + PostgreSQL
 - **Frontend:** React 18 + Vite + Ant Design 5
 - **Tests:** Jest + Supertest (backend) · Vitest + RTL (frontend)
+- **Deployed:** Railway (API + Postgres) · Vercel (Frontend)
 
 ## Features
 
@@ -14,7 +17,30 @@ Full-stack HR tool to manage 10,000+ employees with salary insights.
 - Add / Edit / Delete employees
 - Dashboard — KPI cards, recent hires trend, salary by country, job title breakdown
 
-## Setup
+## Architecture
+
+```mermaid
+graph TB
+    subgraph Vercel["Vercel"]
+        FE["React 18 + Vite + Ant Design 5"]
+    end
+
+    subgraph Railway["Railway"]
+        BE["Node.js + Express API"]
+        DB[(PostgreSQL\n10,000 employees)]
+        BE -- "pg.Pool" --- DB
+    end
+
+    FE -- "HTTPS /api/*" --> BE
+```
+
+| Layer | Service | URL |
+|-------|---------|-----|
+| Frontend | Vercel | https://salary-management-system-nine.vercel.app |
+| Backend API | Railway | https://salary-management-system-production-16db.up.railway.app |
+| Database | Railway Postgres | Internal to Railway network |
+
+## Local Setup
 
 **Prerequisites:** Node.js 18+, PostgreSQL 14+
 
@@ -35,8 +61,6 @@ cd frontend
 npm install
 npm run dev                 # starts on :5173
 ```
-
-Open **http://localhost:5173**
 
 ## API
 
